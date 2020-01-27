@@ -41,7 +41,7 @@ if nargin < 2, disptag = 1; end
 if iscell(in), in = char(in); end
 
 % | Load file
-[p, n, e] = fileparts(in);
+[~, ~, e] = fileparts(in);
 if strcmpi(e, '.mat')
     h = load(in);
     hdr = getnestedfield(h, 'hdr');
@@ -94,19 +94,14 @@ dicominfo.sequenceinfo = struct( ...
     'seriestime', hdr.('SeriesTime'), ...
     'studytime', hdr.('StudyTime'));
 
-idx = cellstrfind(allfn,'TotalScanTimeSec');
-tmp = allfn{idx};
-idx = strfind(tmp,'TotalScanTimeSec');
-tmp = tmp(idx:idx+100);
-idx = strfind(tmp,'=');
-tmp = tmp(idx(1)+1:idx(1)+5);
-dicominfo.sequenceinfo.duration_secs = str2double(tmp);
-str = 'sPat.lAccelFactPE                        = ';
-idx = cellstrfind(allfn,str);
-tmp = allfn{idx};
-idx = strfind(tmp,str);
-idx = idx+length(str);
-dicominfo.sequenceinfo.ipatfactor = str2num(tmp(idx:idx+1));
+% -- 2020-01-27 JMT Handle white-space in newer CSA headers
+val_str = parse_csa_hdr(allfn, 'TotalScanTimeSec');
+dicominfo.sequenceinfo.duration_secs = str2double(val_str);
+
+val_str = parse_csa_hdr(allfn, 'sPat.lAccelFactPE');
+dicominfo.sequenceinfo.ipatfactor = str2double(val_str);
+% --
+
 str = 'dReadoutFOV';
 idx = cellstrfind(allfn,str);
 tmp = allfn{idx};
@@ -114,7 +109,7 @@ idx = strfind(tmp,str);
 tmp = tmp(idx:idx+50);
 idx = strfind(tmp,'=');
 tmp = strtrim(tmp(idx(1)+1:idx(1)+5));
-dicominfo.sequenceinfo.FOVread = str2num(tmp);
+dicominfo.sequenceinfo.FOVread = str2double(tmp);
 
 % dicominfo.sliceinfo
 if strcmp(hdr.ScanningSequence, 'EP')
@@ -157,16 +152,17 @@ if nargout > 0, varargout{1} = dicominfo; end
     
 
 end
+
 % | SUBFUNCTIONS (adapted from code from DICM2NII)
 function [es, uwdir] = get_echo_spacing(s, d)
     
     dim = d.parameterinfo.dim; 
-    [ixyz, R, pixdim, xyz_unit] = xform_mat(s, dim);
+    [ixyz, R, pixdim, ~] = xform_mat(s, dim);
     R(1:2,:) = -R(1:2,:); % dicom LPS to nifti RAS, xform matrix before reorient
     [phPos, fps_bits] = phaseDirection(s);
     [~, perm] = sort(ixyz); % may permute 3 dimensions in this order
     if (strcmp(tryGetField(s, 'MRAcquisitionType'), '3D'))
-        dim(3)>1 && (~isequal(perm, 1:3)) % skip if already standard view
+        dim(3)>1 && (~isequal(perm, 1:3)); % skip if already standard view
         R(:, 1:3) = R(:, perm); % xform matrix after perm
         fps_bits = fps_bits(perm);
         ixyz = ixyz(perm); % 1:3 after re-orient
@@ -190,6 +186,7 @@ function [es, uwdir] = get_echo_spacing(s, d)
     axes = 'xyz';
     uwdir = [pm axes(iPhase)]; 
 end
+
 function [phPos, fps_bits] = phaseDirection(s)
     iPhase = 2; % COLUMN
     foo = tryGetField(s, 'InPlanePhaseEncodingDirection', ''); % no for Philips
@@ -219,6 +216,7 @@ function [phPos, fps_bits] = phaseDirection(s)
     fps_bits = [1 4 16]; % 4 for phase_dim
     if iPhase == ixyz(1), fps_bits = [4 1 16]; end
 end
+
 function val = csa_header(s, key)
 try val = s.CSAImageHeaderInfo.(key); 
 catch, val = [];
@@ -230,6 +228,7 @@ elseif nargin>2, val = dftVal;
 else val = [];
 end
 end
+
 function [ixyz, R, pixdim, xyz_unit] = xform_mat(s, dim)
 R = reshape(tryGetField(s, 'ImageOrientationPatient', [1 0 0 0 1 0]), 3, 2);
 R(:,3) = cross(R(:,1), R(:,2)); % right handed, but sign may be opposite
@@ -311,5 +310,39 @@ end
 if flip, R(:,3) = -R(:,3); end % change to opposite direction
 end
 
- 
+function val_str = parse_csa_hdr(hdr, key_str)
 
+% Find the cell containing key
+cell_idx = cellstrfind(hdr, key_str);
+
+try
+
+    % Extract this cell
+    key_cell = hdr{cell_idx};
+    
+    % Find the key within this cell
+    key_start_idx = strfind(key_cell, key_str);
+    
+    % Extract the next 100 characters
+    tmp_str = key_cell(key_start_idx + (0:99));
+    
+    % Split at newlines and take first line
+    tmp_lines = splitlines(tmp_str);
+    tmp_line = tmp_lines(1);
+    
+    % Split line at '=' into cells and return value string
+    str_bits = split(tmp_line, '=');
+    val_str = str_bits{2};
+    
+catch
+    
+    % Key string not found in header
+    fprintf('* Key string %s not found in header - returning empty value\n', key_str);
+    
+    % Return empty value string
+    val_str = '';
+    
+end
+
+return
+end
