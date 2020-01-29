@@ -2,9 +2,14 @@ function spm_my_defaults
 % SPM_MY_DEFAULTS
 global defaults
 
+% Filename prefix defaults
+%==========================================================================
+defaults.normalise.write.prefix = 'w';
+defaults.smooth.prefix          = 's';
+
 % Mask defaults
 %==========================================================================
-defaults.mask.thresh    = 0.8; % default is 0.8
+defaults.mask.thresh    = -Inf; % default is 0.8
 % change defaults.mask.thresh to -inf to turn off implicit masking (this is
 % very useful if you have one or two subjects who have a lot of signal
 % loss, since you can use an explicit mask and all voxels in the explicit
@@ -14,7 +19,7 @@ defaults.mask.thresh    = 0.8; % default is 0.8
 %==========================================================================
 defaults.stats.maxmem      = 2^33;  % maximum amount of RAM to use (2^33 = 8GB)
 defaults.stats.maxres      = 128;
-defaults.stats.resmem      = true;  % flag to store temporary files on disk (false) or in memory (true)
+defaults.stats.resmem      = false;  % flag to store temporary files on disk (false) or in memory (true)
 defaults.stats.fmri.ufp    = 0.001;  % Upper tail F-probability
 % change defaults.stats.fmri.ufp to relax the threshold for defining voxels
 % for variance estimation at the ReML stage. By default, SPM does the

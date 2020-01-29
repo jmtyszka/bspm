@@ -32,7 +32,7 @@ nfold = length(foldernames);
 % move files
 for i = 1:nfold
     outdir = [foldernames{i} filesep '_omit_'];
-    if ~isdir(outdir), mkdir(outdir); end
+    if ~isfolder(outdir), mkdir(outdir); end
     for f = 1:length(omitpat)
         p = files([foldernames{i} filesep omitpat{f}]);
         if ~isempty(p)

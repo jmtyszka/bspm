@@ -3,6 +3,9 @@ function [flag, volinfo] = bspm_check_orientations(images, verbose)
 % 
 %   USAGE [flag, volinfo] = bspm_check_orientations(images, [verbose])
 %
+%   ARGS
+%       images : cell array of strings, filenames of images to check
+%
 %       FLAG    0: images have same orientations, dimensions, and voxel sizes
 %               1: images have different dimensions
 %               2: images have different orientations and/or voxel sizes
@@ -11,9 +14,12 @@ function [flag, volinfo] = bspm_check_orientations(images, verbose)
 %
 %__________________________________________________________________________
 % Copyright (C) 2005-2011 Wellcome Trust Centre for Neuroimaging
-
+%
 % John Ashburner
 % $Id: spm_check_orientations.m 5097 2012-12-06 16:08:16Z guillaume $
+%
+% 2020-01-29 Mike Tyszka Add argument comments
+
 if nargin < 1, mfile_showhelp; return; end
 if nargin < 2, verbose = true; end
 if ~isstruct(images)
