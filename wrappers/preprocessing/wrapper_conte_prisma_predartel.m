@@ -84,10 +84,10 @@ for s = 1:length(subdirs)
     % Locate fieldmap magnitude and phase images
     fmap_dir = fullfile(subdir, 'raw', pattern.fmdir);
     fmap_mag = files(fullfile(fmap_dir, 'fadolphs_*fieldmap_mag.nii'));
-    fmap_phase = files(fullfile(fmap_dir, 'fadolphs_*fieldmap_phs.nii'));
+    fmap_hz = files(fullfile(fmap_dir, 'fadolphs_*fieldmap_Hz.nii'));
     
     % Extract path, filename and extension of fieldmap phase image
-    [pmapp, pmapn, pmape] = fileparts(fmap_phase{1});
+    [pmapp, pmapn, pmape] = fileparts(fmap_hz{1});
     
     n_epi = length(epidirs);
     
@@ -132,9 +132,9 @@ for s = 1:length(subdirs)
         epi_all{e} = epi_st;
         
         if length(epidirs) == 1
-            vox_disp_map{e} = strcat(pmapp, filesep, 'vdm5_sc', pmapn, pmape);
+            vox_disp_map{e} = strcat(pmapp, filesep, 'vdm5_', pmapn, pmape);
         else
-            vox_disp_map{e} = strcat(pmapp, filesep, 'vdm5_sc', pmapn, sprintf('_run%d', e), pmape);
+            vox_disp_map{e} = strcat(pmapp, filesep, 'vdm5_', pmapn, sprintf('_run%d', e), pmape);
         end
         
         epi_first{e} = epi_st{1};
@@ -153,10 +153,10 @@ for s = 1:length(subdirs)
 
     end
 
-    % | Field Map
+    % | TOPUP Field Map preparation
     count = count + 1;
     fprintf('  Preparing fieldmap\n');
-    matlabbatch(count) = bspm_topup_fieldmap(fmap_mag, fmap_phase, ...
+    matlabbatch(count) = bspm_topup_fieldmap(fmap_mag, fmap_hz, ...
         epi_first, epi_etl, 'blip', blip, 'jacob', jacob);
     
     % | Realign and Unwarp

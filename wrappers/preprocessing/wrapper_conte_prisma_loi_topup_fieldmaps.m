@@ -99,21 +99,6 @@ parfor sc = 1:length(C)
             system(cmd);
         end
         
-        % Convert Hz to radians for a dummy TE difference of 1.0 ms
-        phs_fname = fullfile(fmap_dir, 'fadolphs_fieldmap_phs.nii');
-
-        % Scale Hz fmap by 2 * pi * dTE
-        fmap_dTE = 1e-3;  % Dummy echo time difference in seconds
-        Hz2rads = 2.0 * pi * fmap_dTE;
-        
-        if isfile(phs_fname)
-            fprintf('*  Fieldmap phase image exists - skipping creation\n');
-        else
-            fprintf('  Creating fieldmap phase image (scale by %0.6f)\n', Hz2rads);
-            cmd = sprintf('%s fslmaths %s -mul %f %s', shell, fmap_fname, Hz2rads, phs_fname);
-            system(cmd);
-        end
-        
     end
     
 end

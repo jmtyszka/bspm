@@ -50,7 +50,7 @@ if flag, bspm_reorient(fmap_hz, fmap_mag); end
 % Adapt to use pre-calculated Hz fieldmap from TOPUP
 % Use fieldmap.calculatevdm instead of 
 matlabbatch{1}.spm.tools.fieldmap.calculatevdm.subj.data.precalcfieldmap.precalcfieldmap = fmap_hz;
-matlabbatch{1}.spm.tools.fieldmap.calculatevdm.subj.data.precalcfieldmap.precalcfieldmap = fmap_mag;
+matlabbatch{1}.spm.tools.fieldmap.calculatevdm.subj.data.precalcfieldmap.magfieldmap = fmap_mag;
 
 % Populate list of BOLD EPIs to unwarp
 if length(epi) > 1
@@ -61,11 +61,17 @@ else
     matlabbatch{1}.spm.tools.fieldmap.calculatevdm.subj.session(1).epi = epi;
 end
 
-% Effective echo trail length in ms
+% Dummy MEGE echo times in ms (not needed with precalc Hz fieldmap)
+matlabbatch{1}.spm.tools.fieldmap.calculatevdm.subj.defaults.defaultsval.et = [1.0, 2.0];
+
+% Effective echo train length in ms (total EPI readout time)
 matlabbatch{1}.spm.tools.fieldmap.calculatevdm.subj.defaults.defaultsval.tert = epi_etl;
 
 % Do NOT attempt to mask brain in SE-EPI data using SPM tools
 matlabbatch{1}.spm.tools.fieldmap.calculatevdm.subj.defaults.defaultsval.maskbrain = 0;
+
+matlabbatch{1}.spm.tools.fieldmap.calculatevdm.subj.defaults.defaultsval.blipdir = blip;
+matlabbatch{1}.spm.tools.fieldmap.calculatevdm.subj.defaults.defaultsval.epifm = 0;
 
 matlabbatch{1}.spm.tools.fieldmap.calculatevdm.subj.matchvdm = 1;
 matlabbatch{1}.spm.tools.fieldmap.calculatevdm.subj.sessname = 'run';
