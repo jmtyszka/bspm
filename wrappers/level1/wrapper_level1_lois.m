@@ -56,7 +56,7 @@ function allinput = wrapper_level1_lois(covidx, varargin)
         pmstr           = sprintf(repmat('_%s', 1, length(pmnames)), pmnames{:}); pmstr(1)= [];
     end
     analysisname    = sprintf('%s_%s_Pmodby_%s_%s_%ds_%s', basename, model, ...
-                            pmstr, armethodlabels{armethod + 1}, HPF, bob_timestamp);
+                            pmstr, armethodlabels{armethod + 1}, HPF, bspm_timestamp);
     printmsg(analysisname, 'msgtitle', 'Analysis Name');
 
     % | RUNTIME OPTIONS

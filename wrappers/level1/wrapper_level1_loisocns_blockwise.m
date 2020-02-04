@@ -67,7 +67,7 @@ function allinput = wrapper_level1_loisocns_blockwise(covidx, varargin)
     end
 
     analysisname  = sprintf('%s_%s_Pmodby_%s_%s_%ds_ImpT%d_%s', basename, model, ...
-                            pmstr, armethodlabels{armethod + 1}, HPF, maskthresh*100, bob_timestamp);
+                            pmstr, armethodlabels{armethod + 1}, HPF, maskthresh*100, bspm_timestamp);
     printmsg(analysisname, 'msgtitle', 'Analysis Name');
 
     % | IMAGING PARAMETERS
