@@ -30,7 +30,10 @@ function tsinfo = bspm_badscan(epi, varargin)
     if nargin==0, mfile_showhelp; fprintf('\t| - VARARGIN DEFAULTS - |\n'); disp(vals); return; end
 
     % | PATH TO BRAMILA TOOLS
-    bramiladir = fullfile(getenv('HOME'), 'Github', 'bspm', 'thirdparty', 'bramila');
+    % 2020-02-12 JMT Relocalize for evendim.caltech.edu
+    % bramiladir = fullfile(getenv('HOME'), 'Github', 'bspm', 'thirdparty', 'bramila');
+    bramiladir = '/Users/jmt/Data/Conte/Anita_Conte_LOI/code/bspm/thirdparty/bramila';
+    
     addpath(bramiladir)
 
     % | get data and apply implicit masking
@@ -64,7 +67,11 @@ function tsinfo = bspm_badscan(epi, varargin)
 
     % | use BRAMILA tools to compute dvars and framewise displacement
     fprintf('\n | - Identifying Scans with DVARS > %2.2f and framewise displacement > %2.2f\n', dvars_thresh, framewise_thresh);
-    cfg.plot            = makeplot;
+    
+    % 2020-02-12 JMT
+    % makeplot has no return arguments - not sure which makeplot is being called here
+    % cfg.plot            = makeplot;
+    
     dvars               = bramila_dvars(cfg);
 
     % | get indices of bad timepoints
